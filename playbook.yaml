@@ -1,0 +1,149 @@
+name: test playbook
+variables:
+  - name: "v1"
+  - name: "v2"
+    value: "net statistics workstation"
+  - name: "v3"
+    value: "320"
+stages:
+  - action: "Eval"
+    display: "add 30 to variable v3"
+    parameters:
+      expression: "{{v3}} + 30"
+      result: "v3"
+  - action: "Execute"
+    display: "execute dir command if v3 == 350"
+    condition: "{{v3}} == 350"
+    parameters:
+      command: "dir"
+  - action: "Execute"
+    display: "get pwd"
+    parameters:
+      command: "cd"
+      result: "v1"
+  - action: "Debug"
+    display: "display contents of v1"
+    parameters:
+      message: "{{v1}}"
+  - action: "File"
+    display: "create new directory"
+    parameters:
+      path: "{{v1}}/tst"
+      state: directory
+  - action: "Template"
+    display: "generate a sample file to compress later"
+    parameters:
+      body: |
+        this is a sample of an inline template
+        which will of course have several lines
+        that we can enter like this.
+        ah by the way, this is the value of the
+        v1 variable: {{v1}}
+        and as you know already, this is the value
+        of v3 variable: {{v3}}
+        and we can continue like that for a long
+        time... again, and again...
+        and again.
+        okay that's all folks!
+      path: "{{v1}}/temp.txt"
+  - action: "CopyFile"
+    display: "copy the template to the test folder"
+    parameters:
+      from: "./temp.txt"
+      to: "./tst/temp.txt"
+#ici il faut passer par un truststore qui contient le CA d'azqore
+#  - action: "DownloadFile"
+#    display: "test download file from intranet"
+#    parameters:
+#      url: "https://xldeploy.ch.pbk/ciExplorerDist/libs/images/green-pattern-70b63cfa36a0eb5edefeebb6a11818f4.png"
+#      path: "./tst/green-pattern.png"
+  - action: "Zip"
+    display: "compress target/classes folder"
+    parameters:
+      path: "./target/classes/"
+      archive: "./classes.zip"
+  - action: "Unzip"
+    display: "decompress classes.zip to tst folder"
+    parameters:
+      archive: "./classes.zip"
+      destination: "./tst"
+  - action: "Execute"
+    display: "show files"
+    parameters:
+      command: "dir tst"
+  - action: "File"
+    display: "delete test archive"
+    parameters:
+      path: "./classes.zip"
+      state: "absent"
+  - action: "Archive"
+    display: "create tar.gz from test folder"
+    parameters:
+      directory: "./tst"
+      path: "./test.tar.gz"
+      action: "compress"
+  - action: "File"
+    display: "delete test directory"
+    parameters:
+      path: "./tst"
+      state: "absent"
+  - action: "File"
+    display: "delete test template"
+    parameters:
+      path: "./temp.txt"
+      state: "absent"
+  - action: "Execute"
+    display: "show files"
+    parameters:
+      command: "dir"
+  - action: "Archive"
+    display: "untar to the new test folder"
+    parameters:
+      directory: "./newtest"
+      path: "./test.tar.gz"
+      action: "uncompress"
+  - action: "File"
+    display: "delete tar.gz archive"
+    parameters:
+      path: "./test.tar.gz"
+      state: "absent"
+  - action: "ClientUrl"
+    display: "get a green picture from XLD"
+    parameters:
+      url: "https://xldeploy.ch.pbk/ciExplorerDist/libs/images/green-pattern-70b63cfa36a0eb5edefeebb6a11818f4.png"
+      options: "--insecure --output ./newtest/green-pattern.png"
+  - action: "Execute"
+    display: "show files"
+    parameters:
+      command: "dir newtest"
+  - action: "Lines"
+    display: "add a new line to temp.txt"
+    parameters:
+      file: "./newtest/tst/temp.txt"
+      regexp: "and as you know already"
+      before: "nice, isn't it?"
+  - action: "Lines"
+    display: "add another line to temp.txt"
+    parameters:
+      file: "./newtest/tst/temp.txt"
+      regexp: "enter.+this"
+      after: "this is another line."
+  - action: "Lines"
+    display: "and replace again by never"
+    parameters:
+      file: "./newtest/tst/temp.txt"
+      regexp: "again"
+      replace: "never"
+  - action: "Debug"
+    display: "show content of test file"
+    parameters:
+      file: "./newtest/tst/temp.txt"
+  - action: "File"
+    display: "remove newtest folder"
+    parameters:
+      path: "./newtest"
+      state: "absent"
+  - action: "Execute"
+    display: "show files"
+    parameters:
+      command: "dir"
