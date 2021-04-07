@@ -22,7 +22,7 @@ public class Lines extends AbstractAction {
 
     private Stream<String> lines = null;
 
-    private final List<String> content = new LinkedList<>();
+    private final List<String> content = new LinkedList<String>();
 
     private Path path = null;
 
@@ -33,9 +33,9 @@ public class Lines extends AbstractAction {
     private String before = null;
 
     /**
-     * two mandatories parameters: file which is the file to update, and regexp which
+     * two mandatory parameters: file which is the file to update, and regexp which
      * allows to identify the lines to process in this file.<br>
-     * then we have three differents actions possibles:
+     * then we have three different actions possibles:
      * <ul><li>replace - this will replace the lines by the value of this parameter</li>
      * <li>after - this will insert the line after every lines of the regexp</li>
      * <li>before - same but this time insert the line before</li></ul>
@@ -45,9 +45,15 @@ public class Lines extends AbstractAction {
     @Override
     protected void execute() {
         this.exitCode = 1;
-        getParameter("replace").ifPresent(value -> this.replace = value);
-        getParameter("after").ifPresent(value -> this.after = value);
-        getParameter("before").ifPresent(value -> this.before = value);
+        getParameter("replace").ifPresent(value -> {
+            this.replace = value;
+        });
+        getParameter("after").ifPresent(value -> {
+            this.after = value;
+        });
+        getParameter("before").ifPresent(value -> {
+            this.before = value;
+        });
         getParameter("file").ifPresent(file -> {
             this.path = Paths.get(file);
             try {
@@ -95,7 +101,9 @@ public class Lines extends AbstractAction {
             if (!this.content.isEmpty()) {
                 // rewrite the file
                 try (PrintWriter pw = new PrintWriter(this.path.toFile().getAbsolutePath(), "UTF-8")) {
-                    this.content.forEach(pw::println);
+                    this.content.forEach(line -> {
+                        pw.println(line);
+                    });
                     this.exitCode = 0;
                 } catch (IOException ioex) {
                     LOGGER.warning(String.format("Exception <%s> while trying to update file <%s>", ioex.getMessage(), this.path.toFile().getName()));

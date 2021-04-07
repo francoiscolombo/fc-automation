@@ -50,17 +50,19 @@ public class Unzip extends AbstractAction {
     @Override
     protected void execute() {
         this.exitCode = 1;
-        getParameter("archive").ifPresent(archivePath -> getParameter("destination").ifPresent(folderPath -> {
-            try {
-                Path src = Paths.get(archivePath);
-                Path dst = Paths.get(folderPath);
-                unzip(src, dst);
-                this.exitCode = 0;
-            } catch (Exception ex) {
-                LOGGER.warning(String.format("Something went wrong while trying to unzip <%s> to <%s>: %s", archivePath, folderPath, ex.getMessage()));
-                this.exitCode = 2;
-            }
-        }));
+        getParameter("archive").ifPresent(archivePath -> {
+            getParameter("destination").ifPresent(folderPath -> {
+                try {
+                    Path src = Paths.get(archivePath);
+                    Path dst = Paths.get(folderPath);
+                    unzip(src, dst);
+                    this.exitCode = 0;
+                } catch (Exception ex) {
+                    LOGGER.warning(String.format("Something went wrong while trying to unzip <%s> to <%s>: %s", archivePath, folderPath, ex.getMessage()));
+                    this.exitCode = 2;
+                }
+            });
+        });
     }
 
 }

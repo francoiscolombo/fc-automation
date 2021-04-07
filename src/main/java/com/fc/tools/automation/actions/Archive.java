@@ -98,28 +98,32 @@ public class Archive extends AbstractAction {
     protected void execute() {
         this.exitCode = 1;
         getParameter("directory").ifPresent(
-                folderPath -> getParameter("path").ifPresent(
-                        archivePath -> getParameter("action").ifPresent(
-                                action -> {
-                                    if ("compress".equalsIgnoreCase(action)) {
-                                        this.exitCode = 0;
-                                        createTarGzFromFolder(folderPath, archivePath);
-                                    } else if ("uncompress".equalsIgnoreCase(action)) {
-                                        this.exitCode = 0;
-                                        if (archivePath.endsWith(".tar.gz")) {
-                                            unTarGzFile(archivePath, folderPath);
-                                        } else if (archivePath.endsWith(".tar")) {
-                                            unTarFile(archivePath, folderPath);
-                                        } else {
-                                            LOGGER.warning(String.format("We can uncompress only .tar.gz or .tar archive, and you ask to process archive %s. Sorry, we can't do it.",
-                                                    archivePath));
-                                            this.exitCode = 4;
-                                        }
-                                    } else {
-                                        LOGGER.warning(String.format("Action <%s> is not allowed, only 'compress' and 'uncompress'.", action));
-                                        this.exitCode = 5;
-                                    }
-                                })));
+                folderPath -> {
+                    getParameter("path").ifPresent(
+                            archivePath -> {
+                                getParameter("action").ifPresent(
+                                        action -> {
+                                            if ("compress".equalsIgnoreCase(action)) {
+                                                this.exitCode = 0;
+                                                createTarGzFromFolder(folderPath, archivePath);
+                                            } else if ("uncompress".equalsIgnoreCase(action)) {
+                                                this.exitCode = 0;
+                                                if (archivePath.endsWith(".tar.gz")) {
+                                                    unTarGzFile(archivePath, folderPath);
+                                                } else if (archivePath.endsWith(".tar")) {
+                                                    unTarFile(archivePath, folderPath);
+                                                } else {
+                                                    LOGGER.warning(String.format("We can uncompress only .tar.gz or .tar archive, and you ask to process archive %s. Sorry, we can't do it.",
+                                                            archivePath));
+                                                    this.exitCode = 4;
+                                                }
+                                            } else {
+                                                LOGGER.warning(String.format("Action <%s> is not allowed, only 'compress' and 'uncompress'.", action));
+                                                this.exitCode = 5;
+                                            }
+                                        });
+                            });
+                });
     }
 
 }

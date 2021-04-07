@@ -36,15 +36,17 @@ public class Zip extends AbstractAction {
     @Override
     protected void execute() {
         this.exitCode = 1;
-        getParameter("path").ifPresent(folderPath -> getParameter("archive").ifPresent(archivePath -> {
-            try {
-                zip(folderPath, archivePath);
-                this.exitCode = 0;
-            } catch (IOException ioex) {
-                LOGGER.warning(String.format("Cannot create archive file <%s> from folder <%s> - %s", archivePath, folderPath, ioex.getMessage()));
-                this.exitCode = 2;
-            }
-        }));
+        getParameter("path").ifPresent(folderPath -> {
+            getParameter("archive").ifPresent(archivePath -> {
+                try {
+                    zip(folderPath, archivePath);
+                    this.exitCode = 0;
+                } catch (IOException ioex) {
+                    LOGGER.warning(String.format("Cannot create archive file <%s> from folder <%s> - %s", archivePath, folderPath, ioex.getMessage()));
+                    this.exitCode = 2;
+                }
+            });
+        });
     }
 
 }

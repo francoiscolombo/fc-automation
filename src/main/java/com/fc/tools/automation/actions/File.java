@@ -81,7 +81,6 @@ public class File extends AbstractAction {
                             state -> {
                                 try {
                                     if ("absent".equalsIgnoreCase(state)) {
-                                        //noinspection ResultOfMethodCallIgnored
                                         Files.walk(filePath).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(java.io.File::delete);
                                         this.exitCode = 0;
                                         if (Files.exists(filePath)) {

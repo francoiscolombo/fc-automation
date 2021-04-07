@@ -33,14 +33,12 @@ public class Template extends AbstractAction {
         });
         getParameter("body").ifPresent(contents -> {
             String separator = System.getProperty("line.separator");
-            this.lines = Arrays.stream(contents.split(separator));
+            this.lines = Arrays.asList(contents.split(separator)).stream();
         });
         if (this.lines != null) {
             getParameter("path").ifPresent(destination -> {
                 File path = new File(destination);
-                if(path.getParentFile().mkdirs()) {
-                    LOGGER.info("> Parents dirs was created");
-                }
+                path.getParentFile().mkdirs();
                 try (PrintWriter pw = new PrintWriter(path, "UTF-8")) {
                     this.lines.forEachOrdered(line -> {
                         String l = replaceVariables(line);

@@ -16,7 +16,9 @@ public class Variables {
     }
 
     public List<Variable> all() {
-        return new LinkedList<>(this.variables);
+        List<Variable> allVariables = new LinkedList<>();
+        allVariables.addAll(this.variables);
+        return allVariables;
     }
 
     public void register(final List<Variable> vars) {

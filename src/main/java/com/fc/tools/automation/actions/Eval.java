@@ -16,17 +16,19 @@ public class Eval extends AbstractAction {
     @Override
     protected void execute() {
         this.exitCode = 1;
-        getParameter("expression").ifPresent(exp -> getParameter("result").ifPresent(varName -> {
-            String expression = replaceVariables(exp);
-            try {
-                Object result = JS_ENGINE.eval(expression);
-                setVariable(varName, result);
-                this.exitCode = 0;
-            } catch (ScriptException e) {
-                LOGGER.warning(String.format("An exception happened while evaluating expression <%s>: %s", exp, e.getMessage()));
-                this.exitCode = 2;
-            }
-        }));
+        getParameter("expression").ifPresent(exp -> {
+            getParameter("result").ifPresent(varName -> {
+                String expression = replaceVariables(exp);
+                try {
+                    Object result = JS_ENGINE.eval(expression);
+                    setVariable(varName, result);
+                    this.exitCode = 0;
+                } catch (ScriptException e) {
+                    LOGGER.warning(String.format("An exception happened while evaluating expression <%s>: %s", exp, e.getMessage()));
+                    this.exitCode = 2;
+                }
+            });
+        });
     }
 
 }

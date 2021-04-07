@@ -7,15 +7,19 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * This is the ancestor class for all the actions class.<br>
  *
- * @author BI8XQ - François Colombo
+ * @author François Colombo
  */
 public abstract class AbstractAction implements Action {
 
@@ -32,11 +36,13 @@ public abstract class AbstractAction implements Action {
     private final Map<String, String> parameters = new HashMap<>();
 
     private void registerVariables(final List<Variable> vars) {
-        vars.forEach(v -> this.variables.put(v.getName().trim().toUpperCase(), v));
+        vars.forEach(v -> {
+            this.variables.put(v.getName().trim().toUpperCase(), v);
+        });
     }
 
     private List<Variable> getVariables() {
-        return new ArrayList<>(this.variables.values());
+        return this.variables.values().stream().collect(Collectors.toList());
     }
 
     private void registerParameters() {
@@ -140,8 +146,10 @@ public abstract class AbstractAction implements Action {
         registerVariables(variables);
         registerParameters();
         // only execute if the condition is true
-        if (this.stage.getCondition().isPresent()) {
-            this.stage.getCondition().ifPresent(c -> this.canExecute = checkCondition(c));
+        if (this.stage.getCondition() != null) {
+            this.stage.getCondition().ifPresent(c -> {
+                this.canExecute = checkCondition(c);
+            });
         }
         if (this.canExecute) {
             execute();

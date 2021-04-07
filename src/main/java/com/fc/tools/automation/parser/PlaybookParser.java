@@ -81,7 +81,9 @@ public class PlaybookParser {
         String title = String.format("Running now playbook [%s]", this.playbook.getName());
         String dash = new String(new char[120 - title.length()]).replace("\0", "=");
         LOGGER.info(title.concat(dash));
-        this.playbook.getVariables().forEach(v -> LOGGER.info(String.format("> Variable <%s> defined.", v.getName())));
+        this.playbook.getVariables().forEach(v -> {
+            LOGGER.info(String.format("> Variable <%s> defined.", v.getName()));
+        });
         title = "Running tasks now ";
         dash = new String(new char[120 - title.length()]).replace("\0", "=");
         LOGGER.info(title.concat(dash));
@@ -90,7 +92,7 @@ public class PlaybookParser {
             try {
                 Class<?> actionClass = Class.forName(String.format("com.fc.tools.automation.actions.%s", stage.getAction()));
                 try {
-                    @SuppressWarnings("deprecation") Action action = (Action) actionClass.newInstance();
+                    Action action = (Action) actionClass.newInstance();
                     //LOGGER.info(String.format("Action <%s> loaded.", actionClass.getName()));
                     action.registerStage(stage);
                     Variables.global().register(action.runTask(Variables.global().all()));

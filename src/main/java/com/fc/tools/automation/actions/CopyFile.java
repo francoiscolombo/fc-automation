@@ -17,22 +17,24 @@ public class CopyFile extends AbstractAction {
     @Override
     protected void execute() {
         this.exitCode = 1;
-        getParameter("from").ifPresent(source -> getParameter("to").ifPresent(target -> {
-            Path sourceLocation = Paths.get(source);
-            Path targetLocation = Paths.get(target);
-            CopyFileVisitor fileVisitor = new CopyFileVisitor(sourceLocation, targetLocation);
-            try {
-                Files.walkFileTree(sourceLocation, fileVisitor);
-                LOGGER.info(String.format("<%s> successfully copied to destination <%s>", source, target));
-                this.exitCode = 0;
-            } catch (IOException ioex) {
-                LOGGER.warning(String.format("I/O Exception while trying to copy <%s> to destination <%s> => %s", source, target, ioex.getMessage()));
-                this.exitCode = 2;
-            }
-        }));
+        getParameter("from").ifPresent(source -> {
+            getParameter("to").ifPresent(target -> {
+                Path sourceLocation = Paths.get(source);
+                Path targetLocation = Paths.get(target);
+                CopyFileVisitor fileVisitor = new CopyFileVisitor(sourceLocation, targetLocation);
+                try {
+                    Files.walkFileTree(sourceLocation, fileVisitor);
+                    LOGGER.info(String.format("<%s> successfully copied to destination <%s>", source, target));
+                    this.exitCode = 0;
+                } catch (IOException ioex) {
+                    LOGGER.warning(String.format("I/O Exception while trying to copy <%s> to destination <%s> => %s", source, target, ioex.getMessage()));
+                    this.exitCode = 2;
+                }
+            });
+        });
     }
 
-    private static class CopyFileVisitor extends SimpleFileVisitor<Path> {
+    private class CopyFileVisitor extends SimpleFileVisitor<Path> {
 
         final Path source;
 
@@ -55,7 +57,7 @@ public class CopyFile extends AbstractAction {
         }
 
         @Override
-        public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) {
+        public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException {
             Path newFile = this.target.resolve(this.source.relativize(file));
             try {
                 Files.copy(file, newFile);
@@ -66,7 +68,7 @@ public class CopyFile extends AbstractAction {
         }
 
         @Override
-        public FileVisitResult postVisitDirectory(final Path dir, final IOException ioex) {
+        public FileVisitResult postVisitDirectory(final Path dir, final IOException ioex) throws IOException {
             return FileVisitResult.CONTINUE;
         }
 

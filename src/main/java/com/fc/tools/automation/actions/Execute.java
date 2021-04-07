@@ -25,7 +25,9 @@ public class Execute extends AbstractAction {
                     } else if (System.getProperty("os.name").toUpperCase().contains("LINUX") || System.getProperty("os.name").toUpperCase().contains("AIX")) {
                         builder.command("sh", "-c", command);
                     }
-                    getParameter("dir").ifPresent(dir -> builder.directory(new File(dir)));
+                    getParameter("dir").ifPresent(dir -> {
+                        builder.directory(new File(dir));
+                    });
                     try {
                         Process process = builder.start();
                         try (BufferedReader stdout = new BufferedReader(new InputStreamReader(process.getInputStream()));
@@ -40,7 +42,9 @@ public class Execute extends AbstractAction {
                                 LOGGER.warning("# " + line);
                             }
                             this.exitCode = process.waitFor();
-                            getParameter("result").ifPresent(varName -> setVariable(varName, sout.toString()));
+                            getParameter("result").ifPresent(varName -> {
+                                setVariable(varName, sout.toString());
+                            });
                         }
                     } catch (IOException ex) {
                         LOGGER.severe("### ERROR ### - something went wrong while trying to execute command <" + command + "> - " + ex.getMessage());

@@ -21,7 +21,9 @@ public class Debug extends AbstractAction {
         });
         getParameter("file").ifPresent(path -> {
             try {
-                Files.lines(Paths.get(path)).forEach(line -> LOGGER.info(String.format("DBG: %s", line)));
+                Files.lines(Paths.get(path)).forEach(line -> {
+                    LOGGER.info(String.format("DBG: %s", line));
+                });
                 this.exitCode = 0;
             } catch (IOException ioex) {
                 LOGGER.warning(String.format("An exception happened while trying to show content of file %s, the message is '%s'", path, ioex.getMessage()));

@@ -18,21 +18,23 @@ public class DownloadFile extends AbstractAction {
     @Override
     protected void execute() {
         this.exitCode = 1;
-        getParameter("url").ifPresent(url -> getParameter("path").ifPresent(path -> {
-            try (FileOutputStream fileOutputStream = new FileOutputStream(path)) {
-                ReadableByteChannel readableByteChannel = Channels.newChannel(new URL(url).openStream());
-                FileChannel fileChannel = fileOutputStream.getChannel();
-                fileChannel.transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
-                LOGGER.info(String.format("<%s> successfully copied to destination <%s>", url, path));
-                this.exitCode = 0;
-            } catch (FileNotFoundException e) {
-                LOGGER.warning(String.format("Source URL <%s> is not found: %s", url, e.getMessage()));
-                this.exitCode = 2;
-            } catch (IOException e) {
-                LOGGER.warning(String.format("I/O Exception while trying to copy <%s> to destination <%s> => %s", url, path, e.getMessage()));
-                this.exitCode = 3;
-            }
-        }));
+        getParameter("url").ifPresent(url -> {
+            getParameter("path").ifPresent(path -> {
+                try (FileOutputStream fileOutputStream = new FileOutputStream(path)) {
+                    ReadableByteChannel readableByteChannel = Channels.newChannel(new URL(url).openStream());
+                    FileChannel fileChannel = fileOutputStream.getChannel();
+                    fileChannel.transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
+                    LOGGER.info(String.format("<%s> successfully copied to destination <%s>", url, path));
+                    this.exitCode = 0;
+                } catch (FileNotFoundException e) {
+                    LOGGER.warning(String.format("Source URL <%s> is not found: %s", url, e.getMessage()));
+                    this.exitCode = 2;
+                } catch (IOException e) {
+                    LOGGER.warning(String.format("I/O Exception while trying to copy <%s> to destination <%s> => %s", url, path, e.getMessage()));
+                    this.exitCode = 3;
+                }
+            });
+        });
     }
 
 }

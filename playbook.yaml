@@ -51,12 +51,11 @@ stages:
     parameters:
       from: "./temp.txt"
       to: "./tst/temp.txt"
-#ici il faut passer par un truststore qui contient le CA d'azqore
-#  - action: "DownloadFile"
-#    display: "test download file from intranet"
-#    parameters:
-#      url: "https://xldeploy.ch.pbk/ciExplorerDist/libs/images/green-pattern-70b63cfa36a0eb5edefeebb6a11818f4.png"
-#      path: "./tst/green-pattern.png"
+  - action: "DownloadFile"
+    display: "test download file from intranet"
+    parameters:
+      url: "https://i.redd.it/9sndjq3h2oz41.png"
+      path: "./tst/ubuntu-logo.png"
   - action: "Zip"
     display: "compress target/classes folder"
     parameters:
@@ -107,11 +106,6 @@ stages:
     parameters:
       path: "./test.tar.gz"
       state: "absent"
-  - action: "ClientUrl"
-    display: "get a green picture from XLD"
-    parameters:
-      url: "https://xldeploy.ch.pbk/ciExplorerDist/libs/images/green-pattern-70b63cfa36a0eb5edefeebb6a11818f4.png"
-      options: "--insecure --output ./newtest/green-pattern.png"
   - action: "Execute"
     display: "show files"
     parameters:
