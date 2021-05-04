@@ -74,6 +74,29 @@ as you can see, it's quite simple.
 - _condition_ is optional. if you have one, it is often associated with a test on a variable. if the condition is false, the action will be skipped.
 - _parameters list_ is a list of key / value. depends on the action you are going to execute.
 
+## the 'ForEach' action
+
+this action is special, because it allows looping on the result of a command, or the content of a text file.
+
+of course looping is no sense if you don't set any sub-action... so this is how you have to declare this action:
+
+    - action: "ForEach"
+      display: "a loop!"
+      condition: "`optional condition`"
+      parameters:
+        command: "ls -1 /"
+        variable: "dir"
+        steps:
+        - action: "`action name`"
+          display: "`action message`"
+          condition: "`optional condition`"
+          parameters:
+            `action parameter name`: "`action parameter value`"
+
+as you can see, here we have to declare a block `steps` which will contains a list of actions, like for the `stages` section.
+
+the content of the `variable` parameter will change at every step of the iteration in the loop, and so it can be used in the steps section by the actions.
+
 ## List of available actions
 
 for now, this is the list of the actions that you can use in your playbooks.
@@ -87,6 +110,7 @@ for now, this is the list of the actions that you can use in your playbooks.
 | Eval | expression and result | evaluate the expression and store the result to a variable |
 | Execute | command | execute, locally, the command passed as parameter. use sh for unix system and cmd for windows. |
 | File | - | all purpose action for dealing with file and directory, will be presented on a special chapter. |
+| ForEach | command or file, and variable | this action is a bit special, since it allows to loop on the result of a command or the content of a text file. |
 | Import | playbook | with this action, you can import another playbook and run it from your current playbook. this could be used to separate the variable section and the stages section, for example. |
 | Lines | file, regexp | use this action to change the content of a file. more on this on the next section. |
 | Template | path and template or body | path is the destination path of the file to be generated. template is the source file of the template. you can also use _body_ parameter and embed the template inside your playbook. of course, all the variable defined in the playbook are accessible inside the template. |
