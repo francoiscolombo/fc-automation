@@ -1,35 +1,50 @@
-# FC Automation
+# Automaton
 
 ## how to run it?
 
-the tool is packaged as a simple standalone jar file.
+the tool is packaged as two simple standalone jar files.
 
-to run it you need a jre 8.
+to run it you need a jre 11.
 
-use the following command:
+you have two parts:
+- one is an *agent* and must run on the node where you want to execute the playbook.
+- the other one is the *master* and will read the playbook and send it to the nodes.
 
-    java -jar fc-automation.jar --playbook <path of your playbook>
+to run the agent, use the following command:
+
+    java -jar automaton-agent.jar --port 8071
+
+to run the master (and send the playbook to the agents), use the following command:
+
+    java -jar automaton.jar --playbook <path to your playbook>
 
 ## what is the purpose of this project?
 
-this project provides a command line interface for automating common tasks, and allows to simply automate them.
-you can think about it like a very simple subset of ansible.
+this project provides a command line interface for automating common tasks.
+you can think about it like a very simple subset of ansible, but fully distributed by nature.
 
 it uses a "playbook" to run the task.
 
-you have at least 2 sections in a playbook:
+you have 3 sections in a playbook:
+- nodes
 - variables
 - stages
 
-`variables` it's of course the list of all the variables that are used by the playbook.
+`nodes` describe the agents to connect for executing the playbooks
 
-`stages` it's the list of actions that the playbook needs to run.
+`variables` is the list of all the variables that are used by the playbook (locals to every agent running the playbook)
+
+`stages` is the list of actions that the playbook needs to run.
 
 you also need to give a name to your playbook.
 
 this is a very simple example of a playbook:
 
     name: test playbook
+    nodes:
+      port: 8071
+      hostnames:
+        - localhost
     variables:
       - name: "v1"
         value: "hello world"
@@ -38,6 +53,12 @@ this is a very simple example of a playbook:
         display: "display contents of v1"
         parameters:
           message: "{{v1}}"
+
+## the 'nodes' section
+
+this section describes how to connect to the agents in charge of running the playbook sent by the master process.
+
+you will find here the `port` parameter, which is the port on which every agent is listening, and a list of hostnames
 
 ## the 'variables' section
 
@@ -64,6 +85,13 @@ this is how you define an action:
     - action: "`action name`"
       display: "`action message`"
       condition: "`optional condition`"
+      loop:
+        index: varname
+        range: upperbound
+      foreach:
+        - v1
+        - v2
+        - v3
       parameters:
         `action parameter name`: "`action parameter value`"
 
@@ -72,30 +100,9 @@ as you can see, it's quite simple.
 - _action name_: you will have to select here the action you want to execute. see later the table with all the available actions to know which one to choose.
 - _action message_: displayed before the action starts, and it's a good point to explain here what you action is actually going to do.
 - _condition_ is optional. if you have one, it is often associated with a test on a variable. if the condition is false, the action will be skipped.
+- _loop_ is optional. if you have one, the stage will be repeated. a variable will be created to host the value of the iteration (it's the _index_)
+- _foreach_ is optional. if you have one, the stage will be repeated. a special variable _item_ will host the values that you are listing under foreach, and the value change at every iteration.
 - _parameters list_ is a list of key / value. depends on the action you are going to execute.
-
-## the 'ForEach' action
-
-this action is special, because it allows looping on the result of a command, or the content of a text file.
-
-of course looping is no sense if you don't set any sub-action... so this is how you have to declare this action:
-
-    - action: "ForEach"
-      display: "a loop!"
-      condition: "`optional condition`"
-      parameters:
-        command: "ls -1 /"
-        variable: "dir"
-        steps:
-        - action: "`action name`"
-          display: "`action message`"
-          condition: "`optional condition`"
-          parameters:
-            `action parameter name`: "`action parameter value`"
-
-as you can see, here we have to declare a block `steps` which will contains a list of actions, like for the `stages` section.
-
-the content of the `variable` parameter will change at every step of the iteration in the loop, and so it can be used in the steps section by the actions.
 
 ## List of available actions
 
@@ -110,8 +117,7 @@ for now, this is the list of the actions that you can use in your playbooks.
 | Eval | expression and result | evaluate the expression and store the result to a variable |
 | Execute | command | execute, locally, the command passed as parameter. use sh for unix system and cmd for windows. |
 | File | - | all purpose action for dealing with file and directory, will be presented on a special chapter. |
-| ForEach | command or file, and variable | this action is a bit special, since it allows to loop on the result of a command or the content of a text file. |
-| Import | playbook | with this action, you can import another playbook and run it from your current playbook. this could be used to separate the variable section and the stages section, for example. |
+| Import | playbook | with this action, you can import another playbook and run it from your current playbook. this could be used to separate the variable section and the stages section, for example. please note that this action is the only one running on the master process, all the other actions will runs on the agent side. |
 | Lines | file, regexp | use this action to change the content of a file. more on this on the next section. |
 | Template | path and template or body | path is the destination path of the file to be generated. template is the source file of the template. you can also use _body_ parameter and embed the template inside your playbook. of course, all the variable defined in the playbook are accessible inside the template. |
 | Unzip | archive and destination | this action unzip the archive passed as parameter to the destination folder. |
@@ -263,13 +269,10 @@ have a look, and feel free to get inspired by it.
 
 ## how to build it?
 
-this is a maven project. use maven to build the .jar with the following command:
+this is a maven project. use maven to build the 2 .jars with the following command:
 
-    mvn package
+    mvn clean package
 
-it will create two jars file in the target subdirectory:
+it will create two jars files in the target subdirectory of agent and master modules.
 
-- fc-automation-<_version_>.jar which needs the other dependencies as external libs
-- fc-automation-<_version_>-shaded.jar which is the standalone version that you can use without any dependencies
-
-copy the shaded jar and rename it to fc-automation.jar, that's all.
+copy the shaded jar and rename it to automaton.jar for the master, and automaton-agent.jar for the agent. that's all.
