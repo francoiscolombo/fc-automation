@@ -6,17 +6,13 @@ the tool is packaged as two simple standalone jar files.
 
 to run it you need a jre 11.
 
-you have two parts:
-- one is an *agent* and must run on the node where you want to execute the playbook.
-- the other one is the *master* and will read the playbook and send it to the nodes.
-
 to run the agent, use the following command:
 
-    java -jar automaton-agent.jar --port 8071
+    java -jar automaton.jar --agent --port=8071 --output=./automaton-agent
 
 to run the master (and send the playbook to the agents), use the following command:
 
-    java -jar automaton.jar --playbook <path to your playbook>
+    java -jar automaton.jar --playbook=<path to your playbook>
 
 ## what is the purpose of this project?
 
@@ -269,10 +265,8 @@ have a look, and feel free to get inspired by it.
 
 ## how to build it?
 
-this is a maven project. use maven to build the 2 .jars with the following command:
+this is a maven project. use maven to build the .jar with the following command:
 
     mvn clean package
 
-it will create two jars files in the target subdirectory of agent and master modules.
-
-copy the shaded jar and rename it to automaton.jar for the master, and automaton-agent.jar for the agent. that's all.
+it will create `automaton.jar` file in the target subdirectory of the master module.
