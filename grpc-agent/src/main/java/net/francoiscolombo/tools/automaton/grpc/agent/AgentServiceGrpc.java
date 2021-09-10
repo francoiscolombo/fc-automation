@@ -51,6 +51,18 @@ public final class AgentServiceGrpc {
           .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
               net.francoiscolombo.tools.automaton.grpc.agent.MPong.getDefaultInstance()))
           .build();
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static final io.grpc.MethodDescriptor<net.francoiscolombo.tools.automaton.grpc.agent.MSendFileRequest,
+      net.francoiscolombo.tools.automaton.grpc.agent.MSendFileResponse> METHOD_SENDFILE =
+      io.grpc.MethodDescriptor.<net.francoiscolombo.tools.automaton.grpc.agent.MSendFileRequest, net.francoiscolombo.tools.automaton.grpc.agent.MSendFileResponse>newBuilder()
+          .setType(io.grpc.MethodDescriptor.MethodType.CLIENT_STREAMING)
+          .setFullMethodName(generateFullMethodName(
+              "agent.AgentService", "sendfile"))
+          .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+              net.francoiscolombo.tools.automaton.grpc.agent.MSendFileRequest.getDefaultInstance()))
+          .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+              net.francoiscolombo.tools.automaton.grpc.agent.MSendFileResponse.getDefaultInstance()))
+          .build();
 
   /**
    * Creates a new async stub that supports all call types for the service
@@ -93,6 +105,13 @@ public final class AgentServiceGrpc {
       asyncUnimplementedUnaryCall(METHOD_PING, responseObserver);
     }
 
+    /**
+     */
+    public io.grpc.stub.StreamObserver<net.francoiscolombo.tools.automaton.grpc.agent.MSendFileRequest> sendfile(
+        io.grpc.stub.StreamObserver<net.francoiscolombo.tools.automaton.grpc.agent.MSendFileResponse> responseObserver) {
+      return asyncUnimplementedStreamingCall(METHOD_SENDFILE, responseObserver);
+    }
+
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
@@ -109,6 +128,13 @@ public final class AgentServiceGrpc {
                 net.francoiscolombo.tools.automaton.grpc.agent.MPing,
                 net.francoiscolombo.tools.automaton.grpc.agent.MPong>(
                   this, METHODID_PING)))
+          .addMethod(
+            METHOD_SENDFILE,
+            asyncClientStreamingCall(
+              new MethodHandlers<
+                net.francoiscolombo.tools.automaton.grpc.agent.MSendFileRequest,
+                net.francoiscolombo.tools.automaton.grpc.agent.MSendFileResponse>(
+                  this, METHODID_SENDFILE)))
           .build();
     }
   }
@@ -145,6 +171,14 @@ public final class AgentServiceGrpc {
         io.grpc.stub.StreamObserver<net.francoiscolombo.tools.automaton.grpc.agent.MPong> responseObserver) {
       asyncUnaryCall(
           getChannel().newCall(METHOD_PING, getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public io.grpc.stub.StreamObserver<net.francoiscolombo.tools.automaton.grpc.agent.MSendFileRequest> sendfile(
+        io.grpc.stub.StreamObserver<net.francoiscolombo.tools.automaton.grpc.agent.MSendFileResponse> responseObserver) {
+      return asyncClientStreamingCall(
+          getChannel().newCall(METHOD_SENDFILE, getCallOptions()), responseObserver);
     }
   }
 
@@ -218,6 +252,7 @@ public final class AgentServiceGrpc {
 
   private static final int METHODID_PLAY = 0;
   private static final int METHODID_PING = 1;
+  private static final int METHODID_SENDFILE = 2;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -254,6 +289,9 @@ public final class AgentServiceGrpc {
     public io.grpc.stub.StreamObserver<Req> invoke(
         io.grpc.stub.StreamObserver<Resp> responseObserver) {
       switch (methodId) {
+        case METHODID_SENDFILE:
+          return (io.grpc.stub.StreamObserver<Req>) serviceImpl.sendfile(
+              (io.grpc.stub.StreamObserver<net.francoiscolombo.tools.automaton.grpc.agent.MSendFileResponse>) responseObserver);
         default:
           throw new AssertionError();
       }
@@ -279,6 +317,7 @@ public final class AgentServiceGrpc {
               .setSchemaDescriptor(new AgentServiceDescriptorSupplier())
               .addMethod(METHOD_PLAY)
               .addMethod(METHOD_PING)
+              .addMethod(METHOD_SENDFILE)
               .build();
         }
       }

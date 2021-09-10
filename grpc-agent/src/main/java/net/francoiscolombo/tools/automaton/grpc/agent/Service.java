@@ -59,6 +59,16 @@ public final class Service {
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_agent_MPong_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_agent_MSendFileRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_agent_MSendFileRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_agent_MSendFileResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_agent_MSendFileResponse_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -81,9 +91,14 @@ public final class Service {
       "ble\022\035\n\006stages\030\003 \003(\0132\r.agent.MStage\":\n\tMR" +
       "esponse\022\014\n\004code\030\001 \001(\r\022\016\n\006reason\030\002 \001(\t\022\017\n" +
       "\007message\030\003 \001(\t\"\025\n\005MPing\022\014\n\004ping\030\001 \001(\t\"\025\n" +
-      "\005MPong\022\014\n\004pong\030\001 \001(\t2^\n\014AgentService\022*\n\004" +
-      "play\022\020.agent.MPlaybook\032\020.agent.MResponse" +
-      "\022\"\n\004ping\022\014.agent.MPing\032\014.agent.MPongB2\n." +
+      "\005MPong\022\014\n\004pong\030\001 \001(\t\"L\n\020MSendFileRequest" +
+      "\022\014\n\004name\030\001 \001(\t\022\014\n\004path\030\002 \001(\t\022\014\n\004data\030\003 \001" +
+      "(\014\022\016\n\006offset\030\004 \001(\003\"4\n\021MSendFileResponse\022" +
+      "\016\n\006status\030\001 \001(\005\022\017\n\007message\030\002 \001(\t2\241\001\n\014Age" +
+      "ntService\022*\n\004play\022\020.agent.MPlaybook\032\020.ag" +
+      "ent.MResponse\022\"\n\004ping\022\014.agent.MPing\032\014.ag" +
+      "ent.MPong\022A\n\010sendfile\022\027.agent.MSendFileR",
+      "equest\032\030.agent.MSendFileResponse\"\000(\001B2\n." +
       "net.francoiscolombo.tools.automaton.grpc" +
       ".agentP\001b\006proto3"
     };
@@ -153,6 +168,18 @@ public final class Service {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_agent_MPong_descriptor,
         new java.lang.String[] { "Pong", });
+    internal_static_agent_MSendFileRequest_descriptor =
+      getDescriptor().getMessageTypes().get(9);
+    internal_static_agent_MSendFileRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_agent_MSendFileRequest_descriptor,
+        new java.lang.String[] { "Name", "Path", "Data", "Offset", });
+    internal_static_agent_MSendFileResponse_descriptor =
+      getDescriptor().getMessageTypes().get(10);
+    internal_static_agent_MSendFileResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_agent_MSendFileResponse_descriptor,
+        new java.lang.String[] { "Status", "Message", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

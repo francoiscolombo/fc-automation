@@ -11,6 +11,7 @@
     <packaging>pom</packaging>
 
     <properties>
+        <java.version>11</java.version>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <lombok.version>1.18.20</lombok.version>
@@ -19,93 +20,18 @@
         <grpc.version>1.40.0</grpc.version>
         <osmavenplugin.version>1.7.0</osmavenplugin.version>
         <protoc.version>0.6.1</protoc.version>
-        <junit.version>5.7.0</junit.version>
-        <findbugs.version>3.0.5</findbugs.version>
-        <surefire.version>2.22.2</surefire.version>
-        <failsafe.version>2.22.2</failsafe.version>
-        <jacoco.version>0.8.7</jacoco.version>
         <commons.compress.version>1.21</commons.compress.version>
         <picocli.version>4.6.1</picocli.version>
+        <picocli-jansi-graalvm.version>1.2.0</picocli-jansi-graalvm.version>
+        <jansi.version>2.3.4</jansi.version>
         <snakeyaml.version>1.29</snakeyaml.version>
+        <graalvm.version>21.2.0</graalvm.version>
+        <exec.mainClass>${project.groupId}.Start</exec.mainClass>
     </properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
-
-    <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.8.0</version>
-                    <configuration>
-                        <source>11</source>
-                        <target>11</target>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>findbugs-maven-plugin</artifactId>
-                <version>${findbugs.version}</version>
-            </plugin>
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${surefire.version}</version>
-            </plugin>
-            <plugin>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <version>${failsafe.version}</version>
-            </plugin>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>${jacoco.version}</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>generate-code-coverage-report</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
-
     <modules>
-        <module>models</module>
-        <module>actions</module>
         <module>grpc-agent</module>
-        <module>agent</module>
-        <module>master</module>
+        <module>automaton</module>
     </modules>
 
 </project>

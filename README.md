@@ -1,19 +1,5 @@
 # Automaton
 
-## how to run it?
-
-the tool is packaged as two simple standalone jar files.
-
-to run it you need a jre 11.
-
-to run the agent, use the following command:
-
-    java -jar automaton.jar --agent --port=8071 --output=./automaton-agent
-
-to run the master (and send the playbook to the agents), use the following command:
-
-    java -jar automaton.jar --playbook=<path to your playbook>
-
 ## what is the purpose of this project?
 
 this project provides a command line interface for automating common tasks.
@@ -95,10 +81,28 @@ as you can see, it's quite simple.
 
 - _action name_: you will have to select here the action you want to execute. see later the table with all the available actions to know which one to choose.
 - _action message_: displayed before the action starts, and it's a good point to explain here what you action is actually going to do.
-- _condition_ is optional. if you have one, it is often associated with a test on a variable. if the condition is false, the action will be skipped.
+- _condition_ is optional. if you have one, it is often associated with a test on a variable. if the condition is false, the action will be skipped. here, you can't use very complex conditions, see the next section for more details.
 - _loop_ is optional. if you have one, the stage will be repeated. a variable will be created to host the value of the iteration (it's the _index_)
 - _foreach_ is optional. if you have one, the stage will be repeated. a special variable _item_ will host the values that you are listing under foreach, and the value change at every iteration.
 - _parameters list_ is a list of key / value. depends on the action you are going to execute.
+
+_a point about conditions_:
+
+conditions are meant to test a value of a variable, and can't really be complex.
+
+the following conditions are supported:
+
+- {{var}} == {{var}} or value _will test if a variable is equals to another variable or a value_
+- {{var}} != {{var}} or value _will test if a variable is NOT equals to another variable or a value_
+- {{var}} > {{var}} or value _will test if a variable is greater than another variable or a value_
+- {{var}} >= {{var}} or value _will test if a variable is greater than or equals to another variable or a value_
+- {{var}} < {{var}} or value _will test if a variable is lower than another variable or a value_
+- {{var}} <= {{var}} or value _will test if a variable is lower than or equals to another variable or a value_
+- exists({{var}} or value) _will be true if the file located at the path hosted by var or value exists_
+- readable({{var}} or value) _will be true if the file located at the path hosted by var or value exists and is readable_
+- writable({{var}} or value) _will be true if the file located at the path hosted by var or value exists and is writable_
+
+operators like _or_, _and_, _not_ are not allowed. composed conditions (with parenthesis) are not allowed. Keep it simple.
 
 ## List of available actions
 
@@ -110,11 +114,12 @@ for now, this is the list of the actions that you can use in your playbooks.
 | CopyFile | from and to | well, as you can expect, this action copy a file from a destination to a target. you have to give the complete path for both parameters (source and target) |
 | Debug | message or file | this action simply display the message or the content of a file. |
 | DownloadFile | url and path | as you can expect, this action download a file from the _url_ to the path that you give. |
-| Eval | expression and result | evaluate the expression and store the result to a variable |
+| Eval | expression and result | evaluate a *numeric* expression and store the result to a variable |
 | Execute | command | execute, locally, the command passed as parameter. use sh for unix system and cmd for windows. |
 | File | - | all purpose action for dealing with file and directory, will be presented on a special chapter. |
 | Import | playbook | with this action, you can import another playbook and run it from your current playbook. this could be used to separate the variable section and the stages section, for example. please note that this action is the only one running on the master process, all the other actions will runs on the agent side. |
 | Lines | file, regexp | use this action to change the content of a file. more on this on the next section. |
+| SendFile | source, sourcepath, target, port, targetpath | if the playbook is running on the source agent, will send the file located at sourcepath to the agent running on the node target:port, and copy the file on the target path on this node. |
 | Template | path and template or body | path is the destination path of the file to be generated. template is the source file of the template. you can also use _body_ parameter and embed the template inside your playbook. of course, all the variable defined in the playbook are accessible inside the template. |
 | Unzip | archive and destination | this action unzip the archive passed as parameter to the destination folder. |
 | Zip | path and archive | and this action will zip the content of the _path_ directory to create a new archive. |
@@ -265,8 +270,84 @@ have a look, and feel free to get inspired by it.
 
 ## how to build it?
 
-this is a maven project. use maven to build the .jar with the following command:
+this is a **java native project**, which means that you have to prepare your environment in order to be able to build it.
 
-    mvn clean package
+### install SDKMAN
 
-it will create `automaton.jar` file in the target subdirectory of the master module.
+First thing to do is to install SDKMan with this command:
+
+    curl -s "https://get.sdkman.io" | bash
+
+Then, follow the on-screen instructions to complete the installation. Please note that you might need the zip and unzip packages installed to complete the installation process.
+
+Next, open a new terminal or run:
+
+    source "$HOME/.sdkman/bin/sdkman-init.sh"
+
+Lastly, run the following command to ensure the installation worked. If all went well, the version should be displayed:
+
+    sdk version
+
+To see all the available commands, use the help command:
+
+    sdk help
+
+### install GraalVM
+
+Starts by listing all the JVM available with this command:
+
+    sdk list java
+
+Search for the latest version of GraalVM for the JDK 11. At the time I write this README, it is **21.2.0.r11**
+
+    sdk install java 21.2.0.r11-grl
+
+By default, SDKMAN will update your default configuration to use the new JVM. Check it by running the command:
+
+    java -version
+
+you should see the GraalVM line at the end, like this:
+
+    openjdk version "11.0.12" 2021-07-20
+    OpenJDK Runtime Environment GraalVM CE 21.2.0 (build 11.0.12+6-jvmci-21.2-b08)
+    OpenJDK 64-Bit Server VM GraalVM CE 21.2.0 (build 11.0.12+6-jvmci-21.2-b08, mixed mode, sharing)
+
+If needed, you will have to change `JAVA_HOME` environment variable to point to GraalVM's distribution. Don't forget to change it also under your IDE! Even more if you are using an embedded version of maven.
+
+Last, let's install the native-image compiler provided by the installed GraalVM's distribution:
+
+    gu install native-image
+
+Then check that everything is installed properly:
+
+    gu list
+
+Should display something like:
+
+    ComponentId              Version             Component name                Stability                     Origin
+    ---------------------------------------------------------------------------------------------------------------------------------
+    graalvm                  21.2.0              GraalVM Core                  -                             
+    js                       21.2.0              Graal.js                      Supported                     
+    native-image             21.2.0              Native Image                  Early adopter                 github.com
+
+Good, we can continue.
+
+### Build & Run
+
+We are ready to build our native image by providing the native profile in the Maven package command:
+
+    mvn -Pnative -DskipTests clean package
+
+The Maven command will create the `automaton` executor file in the target folder. So, we can run our app by simply accessing the executor file:
+
+    automaton/target/automaton
+
+And that's it! now you have your native automaton command line, that you can distribute everywhere you need.
+
+To run the agent, use the following command:
+
+    automaton --agent --port=8071 --output=./automaton-agent
+
+To run the master (and send the playbook to the agents), use the following command:
+
+    automaton --playbook=<path to your playbook>

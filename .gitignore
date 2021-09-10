@@ -26,3 +26,9 @@ hs_err_pid*
 
 playbook_execute.drawio
 
+/automaton/automaton.iml
+/automaton/dependency-reduced-pom.xml
+/parent.iml
+/automaton/target/
+/grpc-agent/target/
+/grpc-agent/grpc-agent.iml

@@ -72,14 +72,14 @@ stages:
       url: "https://i.redd.it/9sndjq3h2oz41.png"
       path: "./tst/ubuntu-logo.png"
   - action: "Zip"
-    display: "compress target/classes folder"
+    display: "compress protoc plugins folder"
     parameters:
-      path: "./target/classes/"
-      archive: "./classes.zip"
+      path: "./grpc-agent/target/protoc-plugins"
+      archive: "./plugins.zip"
   - action: "Unzip"
-    display: "decompress classes.zip to tst folder"
+    display: "decompress plugins.zip to tst folder"
     parameters:
-      archive: "./classes.zip"
+      archive: "./plugins.zip"
       destination: "./tst"
   - action: "Execute"
     display: "show files"
@@ -88,7 +88,7 @@ stages:
   - action: "File"
     display: "delete test archive"
     parameters:
-      path: "./classes.zip"
+      path: "./plugins.zip"
       state: "absent"
   - action: "Archive"
     display: "create tar.gz from test folder"
