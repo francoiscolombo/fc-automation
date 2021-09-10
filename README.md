@@ -130,7 +130,7 @@ now let's dig inside some of the most interesting actions...
 
 ### Eval action
 
-this action allows to process variables and to store the result in one of the processed variables or another one.
+evaluate a numeric expression, which can contains numeric variable, and store the result in a variable.
 
 let's take an example. you have 2 variables that are actually numbers: v1 with a value of 20 and v2 with a value of 30.
 
@@ -152,9 +152,7 @@ you can also use this to increment the value of a variable, like this:
         expression: "{{v1}} + 10"
         result: "v1"
 
-the expression is whatever expression that can be use in javascript, since it's actually the inner javascript engine associated with java that is used to evaluate the expression.
-
-_please note that if you want to act on a string variable you will have to double-quote the value of the variable !!!_
+please note that the expression *must be a valid numeric expression*. you can also use some function like cos, sin, tan, and the *pow* function is available through the ^ character. so pow(2,2) is 2^2.
 
 ### File action
 
@@ -259,6 +257,29 @@ this time, you will have to use the *replace* parameter, like this:
         file: "./newtest/tst/temp.txt"
         regexp: "again"
         replace: "never"
+
+### the SendFile action
+
+this action is a bit particular, because it takes a file on a source node and send it to a target node.
+
+both nodes must be registered on the **nodes** section.
+
+when a node see this action, it first checks if it is concerned by this action (so if he is the source node), and only if it is the case it will process the action. otherwise, nothing happens, the action is just skipped.
+
+to uses this action, you will have to define a path on a source node, define the target node and set the path where the target node will receive the file.
+
+this is a sample of this action:
+
+    - action: "SendFile"
+      display: "send myarchive.zip located at mynode:/mypath/myarchive.zip to node myothernode"
+      parameters:
+        source: mynode
+        sourcepath: "/mypath/myarchive.zip"
+        target: myothernode
+        port: 8071
+        targetpath: "/tmp/myotherpath/myarchive.zip"
+
+copy is done by a grpc service by streaming.
 
 ### conclusion
 
