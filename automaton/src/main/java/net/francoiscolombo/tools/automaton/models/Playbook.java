@@ -11,9 +11,11 @@ public class Playbook {
 
     private String name;
 
-    private Nodes nodes;
+    private List<Hostname> nodes;
 
     private List<Variable> variables;
+
+    private List<Vault> vault;
 
     private List<Stage> stages;
 

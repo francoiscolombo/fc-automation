@@ -1,4 +1,4 @@
-package net.francoiscolombo.tools.automaton.actions;
+package net.francoiscolombo.tools.automaton.exceptions;
 
 public class ParameterNotFound extends Exception {
     public ParameterNotFound(String message) {

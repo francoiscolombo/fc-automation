@@ -1,6 +1,7 @@
 package net.francoiscolombo.tools.automaton.actions;
 
 import net.francoiscolombo.tools.automaton.eval.EvalCondition;
+import net.francoiscolombo.tools.automaton.exceptions.ParameterNotFound;
 import net.francoiscolombo.tools.automaton.models.Stage;
 import net.francoiscolombo.tools.automaton.models.Variable;
 
@@ -21,7 +22,7 @@ import java.util.regex.Pattern;
  *
  * @author François Colombo
  */
-public abstract class AbstractAction implements Action {
+public abstract class AbstractAction implements IAction {
 
     // global logger
     private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);

@@ -21,7 +21,9 @@ public class AgentClient implements Callable<AgentResult> {
 
     private final Playbook playbook;
 
-    public AgentClient(String hostname, int port, Playbook playbook) {
+    private final boolean pingOnly;
+
+    public AgentClient(String hostname, int port, Playbook playbook, boolean pingOnly) {
         this.blockingStub = AgentServiceGrpc.newBlockingStub(
                 ManagedChannelBuilder
                         .forAddress(hostname, port)
@@ -29,6 +31,7 @@ public class AgentClient implements Callable<AgentResult> {
                         .build()
         );
         this.playbook = playbook;
+        this.pingOnly = pingOnly;
     }
 
     @Override
@@ -38,13 +41,15 @@ public class AgentClient implements Callable<AgentResult> {
             MPong pong = blockingStub.ping(MPing.newBuilder().setPing("PING").build());
             if(pong.getPong().equalsIgnoreCase("PONG")) {
                 LOGGER.info("Agent is ready for running playbook.");
-                // okay we can run the playbook
-                MResponse response = blockingStub.play(ModelConverter.createRequest(this.playbook));
-                AgentResult result = new AgentResult(response.getCode(), response.getReason(), response.getMessage());
-                if(result.getStatusCode() < 400) {
-                    LOGGER.info(result.toString());
-                } else {
-                    LOGGER.warning(result.toString());
+                AgentResult result = new AgentResult(100, "PING", "Agent answer with a proper PONG");
+                if(!pingOnly) {
+                    MResponse response = blockingStub.play(ModelConverter.createRequest(this.playbook));
+                    result = new AgentResult(response.getCode(), response.getReason(), response.getMessage());
+                    if(result.getStatusCode() < 400) {
+                        LOGGER.info(result.toString());
+                    } else {
+                        LOGGER.warning(result.toString());
+                    }
                 }
                 return result;
             } else {

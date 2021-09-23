@@ -1,16 +1,16 @@
 name: test playbook
 
 nodes:
-  port: 8071
-  hostnames:
-    - localhost
+  - hostname: localhost
+    port: 8071
 
 variables:
   - name: "v1"
-  - name: "v2"
-    value: "netstat -r"
   - name: "v3"
     value: "290"
+
+vault:
+  - key: "v2"
 
 stages:
   - action: "Eval"

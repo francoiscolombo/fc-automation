@@ -4,6 +4,7 @@ import com.google.protobuf.ByteString;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import net.francoiscolombo.tools.automaton.agent.service.AgentService;
+import net.francoiscolombo.tools.automaton.exceptions.ParameterNotFound;
 import net.francoiscolombo.tools.automaton.grpc.agent.AgentServiceGrpc;
 import net.francoiscolombo.tools.automaton.grpc.agent.MSendFileRequest;
 import net.francoiscolombo.tools.automaton.grpc.agent.MSendFileResponse;

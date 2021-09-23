@@ -10,7 +10,7 @@ import java.util.List;
  *
  * @author François Colombo
  */
-public interface Action {
+public interface IAction {
 
     void registerStage(Stage stage);
 

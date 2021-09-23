@@ -7,16 +7,19 @@ you can think about it like a very simple subset of ansible, but fully distribut
 
 it uses a "playbook" to run the task.
 
-you have 3 sections in a playbook:
+you can have up to 4 sections in a playbook:
 - nodes
 - variables
+- vault
 - stages
 
-`nodes` describe the agents to connect for executing the playbooks
+`nodes` is a mandatory section, and describe the agents to connect for executing the playbooks. it is the inventory of the playbook. this means that any playbook can have a different inventory, which is quite different of other tools like ansible that expect the inventory to be global.
 
-`variables` is the list of all the variables that are used by the playbook (locals to every agent running the playbook)
+`variables` is the list of all the variables that are used by the playbook (and these variables are local to every agent running the playbook)
 
-`stages` is the list of actions that the playbook needs to run.
+`vault` is also a list of variables name, and be used as variables inside the playbook. however, here you just give the name of a key that is present inside the automaton vault. more about that later.
+
+`stages` is of course a mandatory section, this is the list of actions that the playbook needs to run.
 
 you also need to give a name to your playbook.
 
@@ -24,9 +27,8 @@ this is a very simple example of a playbook:
 
     name: test playbook
     nodes:
-      port: 8071
-      hostnames:
-        - localhost
+      - hostname: localhost
+        port: 8071
     variables:
       - name: "v1"
         value: "hello world"
@@ -55,6 +57,36 @@ a variable does not have type, but needs to be declared as string on the yaml fi
 if you don't want to set an initial value for a variable, just use the empty string like this: ""
 
 you can also set the value of a variable dynamically, but we will talk about that on the next section.
+
+## the 'vault' section
+
+when you need to store credentials, of course you cannot use variables, because the values are not ciphered.
+
+but you will probably still need to use variables like a db password for example in your playbook.
+
+this is when you will use this section. the vault section describe the **key** of the **vault** that you will use inside your playbook.
+
+when *automaton* read this section, it will automatically open the vault, read the value of the given key, and generate a variable that you can use inside your playbook.
+
+uses the *automaton* command line client to manage your vault:
+
+    automaton --vault --create key
+
+will create a key in your vault. the value of the key is asked from the command line.
+
+    automaton --vault --update key
+
+will update the value of a key inside your vault.
+
+    automaton --vault --delete key
+
+will remove a key from your vault.
+
+    automaton --vault --list
+
+will list the keys currently present inside your vault.
+
+the vault is stored inside your `$HOME` directory, in a subdirectory called `.automaton`
 
 ## the 'stages' section
 

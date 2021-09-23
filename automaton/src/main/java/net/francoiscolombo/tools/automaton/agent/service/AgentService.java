@@ -1,7 +1,7 @@
 package net.francoiscolombo.tools.automaton.agent.service;
 
 import io.grpc.stub.StreamObserver;
-import net.francoiscolombo.tools.automaton.actions.Action;
+import net.francoiscolombo.tools.automaton.actions.IAction;
 import net.francoiscolombo.tools.automaton.grpc.agent.*;
 import net.francoiscolombo.tools.automaton.models.Playbook;
 import net.francoiscolombo.tools.automaton.models.Variable;
@@ -141,7 +141,7 @@ public class AgentService extends AgentServiceGrpc.AgentServiceImplBase {
             try {
                 Class<?> actionClass = Class.forName(String.format(ACTIONS_PACKAGE, stage.getAction()));
                 try {
-                    Action action = (Action) actionClass.getDeclaredConstructor().newInstance();
+                    IAction action = (IAction) actionClass.getDeclaredConstructor().newInstance();
                     //LOGGER.info(String.format("Action <%s> loaded.", actionClass.getName()));
                     action.registerStage(stage);
                     Variables.global().register(action.runTask(Variables.global().all()));

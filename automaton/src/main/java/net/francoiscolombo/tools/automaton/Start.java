@@ -5,7 +5,10 @@ import io.grpc.ServerBuilder;
 import net.francoiscolombo.tools.automaton.agent.client.AgentClient;
 import net.francoiscolombo.tools.automaton.agent.client.AgentResult;
 import net.francoiscolombo.tools.automaton.agent.service.AgentService;
+import net.francoiscolombo.tools.automaton.cypher.VaultManager;
+import net.francoiscolombo.tools.automaton.models.Hostname;
 import net.francoiscolombo.tools.automaton.models.Playbook;
+import net.francoiscolombo.tools.automaton.models.Vault;
 import net.francoiscolombo.tools.automaton.parser.PlaybookParser;
 import picocli.CommandLine;
 import picocli.jansi.graalvm.AnsiConsole;
@@ -19,10 +22,10 @@ import java.util.concurrent.*;
 import java.util.logging.*;
 
 @CommandLine.Command(
-        name = "net/francoiscolombo/tools/automaton",
+        name = "automaton",
         mixinStandardHelpOptions = true,
-        version = "net.francoiscolombo.tools.automaton 1.0",
-        description = "net.francoiscolombo.tools.automaton is a tool for helping you to manage efficiently your servers configuration"
+        version = "automaton 1.0.0",
+        description = "automaton is a tool for helping you to manage efficiently your servers configuration"
 )
 public class Start implements Callable<Integer> {
 
@@ -41,14 +44,35 @@ public class Start implements Callable<Integer> {
     @CommandLine.Option(names = {"--playbook"}, defaultValue="", description = "playbook to execute, full path")
     private String playbookPath;
 
+    @CommandLine.Option(names = {"--ping-only"}, description = "ping all the nodes of a playbook to check if agents are started")
+    private boolean pingAgents;
+
     @CommandLine.Option(names = {"--output"}, defaultValue = "", description = "redirect stdout to a file")
     private String logFilePath;
 
     @CommandLine.Option(names = {"--agent"}, description = "starts as an agent (you should set the port in this case, otherwise the default port value of 8071 is taken)")
-    private boolean agentMode;
+    private boolean isAgentMode;
 
     @CommandLine.Option(names = {"--port"}, defaultValue = "8071", description = "port on which the agent will listening")
     private String agentPort;
+
+    @CommandLine.Option(names = {"--vault"}, description = "manage the local vault")
+    private boolean isVault;
+
+    @CommandLine.Option(names = {"--create"}, defaultValue = "", description = "create a key in the vault and set the initial value")
+    private String createKey;
+
+    @CommandLine.Option(names = {"--update"}, defaultValue = "", description = "update the value of an existing key in the vault with a new value")
+    private String updateKey;
+
+    @CommandLine.Option(names = {"--delete"}, defaultValue = "", description = "delete an existing key in the vault")
+    private String deleteKey;
+
+    @CommandLine.Option(names = {"--retrieve"}, defaultValue = "", description = "retrieve the value of an existing key in the vault")
+    private String vaultKey;
+
+    @CommandLine.Option(names = {"--list"}, description = "list all the keys currently stored inside the vault")
+    private boolean listVault;
 
     @Override
     public Integer call() throws Exception {
@@ -65,7 +89,7 @@ public class Start implements Callable<Integer> {
         }
         LOGGER.setLevel(Level.ALL);
         // are we in agent mode or in master mode?
-        if(agentMode) {
+        if(isAgentMode) {
             try {
                 int port = Integer.parseInt(agentPort);
                 Server server = ServerBuilder.forPort(port).addService(new AgentService()).build();
@@ -84,20 +108,39 @@ public class Start implements Callable<Integer> {
                     LOGGER.severe(exception.getMessage());
                     return -2;
                 }
-            } catch(NumberFormatException exception) {
-                LOGGER.severe(String.format("Port %s is not numeric ! please provide a numeric port, like 8071 for example.",agentPort));
+            } catch (NumberFormatException exception) {
+                LOGGER.severe(String.format("Port %s is not numeric ! please provide a numeric port, like 8071 for example.", agentPort));
                 return -1;
+            }
+        } else if(isVault) {
+            // master: manage the local vault
+            if(listVault) {
+                VaultManager.getIntance().listKeys();
+            } else {
+                if(!"".equals(createKey)) {
+                    // create a new key
+                    VaultManager.getIntance().createKey(createKey);
+                } else if(!"".equals(updateKey)) {
+                    // update an existing key
+                    VaultManager.getIntance().updateKey(updateKey);
+                } else if(!"".equals(deleteKey)) {
+                    // delete an existing key
+                    VaultManager.getIntance().deleteKey(deleteKey);
+                } else if(!"".equals(vaultKey)) {
+                    // retrieve existing key
+                    String value = VaultManager.getIntance().retrieve(vaultKey);
+                    System.out.printf("Value for key <%s> is '%s'\n", vaultKey, value);
+                }
             }
         } else {
             // master: run a playbook
             if(Paths.get(playbookPath).toFile().exists()) {
                 if(Paths.get(playbookPath).toFile().canRead()) {
                     final Playbook playbook = PlaybookParser.build(playbookPath).checkImports().getPlaybook();
-                    final ExecutorService executor = Executors.newFixedThreadPool(playbook.getNodes().getHostnames().size());
-                    final int agentPort = playbook.getNodes().getPort();
+                    final ExecutorService executor = Executors.newFixedThreadPool(playbook.getNodes().size());
                     final List<Callable<AgentResult>> agents = new LinkedList<>();
-                    for(String hostname : playbook.getNodes().getHostnames()) {
-                        agents.add(new AgentClient(hostname, agentPort, playbook));
+                    for(Hostname hostname : playbook.getNodes()) {
+                        agents.add(new AgentClient(hostname.getHostname(), hostname.getPort(), playbook, pingAgents));
                     }
                     final List<Future<AgentResult>> allTasks = executor.invokeAll(agents);
                     boolean allIsDone = true;

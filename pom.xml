@@ -25,6 +25,7 @@
         <picocli-jansi-graalvm.version>1.2.0</picocli-jansi-graalvm.version>
         <jansi.version>2.3.4</jansi.version>
         <snakeyaml.version>1.29</snakeyaml.version>
+        <nitrite.version>3.4.2</nitrite.version>
         <graalvm.version>21.2.0</graalvm.version>
         <exec.mainClass>${project.groupId}.Start</exec.mainClass>
     </properties>
