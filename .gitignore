@@ -32,3 +32,4 @@ playbook_execute.drawio
 /automaton/target/
 /grpc-agent/target/
 /grpc-agent/grpc-agent.iml
+/automaton-script/ascript.iml

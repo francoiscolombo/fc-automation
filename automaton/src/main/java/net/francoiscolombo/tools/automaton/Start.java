@@ -5,10 +5,11 @@ import io.grpc.ServerBuilder;
 import net.francoiscolombo.tools.automaton.agent.client.AgentClient;
 import net.francoiscolombo.tools.automaton.agent.client.AgentResult;
 import net.francoiscolombo.tools.automaton.agent.service.AgentService;
+import net.francoiscolombo.tools.automaton.ascript.AScriptInterpreterTask;
+import net.francoiscolombo.tools.automaton.ascript.exceptions.AScriptException;
 import net.francoiscolombo.tools.automaton.cypher.VaultManager;
 import net.francoiscolombo.tools.automaton.models.Hostname;
 import net.francoiscolombo.tools.automaton.models.Playbook;
-import net.francoiscolombo.tools.automaton.models.Vault;
 import net.francoiscolombo.tools.automaton.parser.PlaybookParser;
 import picocli.CommandLine;
 import picocli.jansi.graalvm.AnsiConsole;
@@ -74,6 +75,9 @@ public class Start implements Callable<Integer> {
     @CommandLine.Option(names = {"--list"}, description = "list all the keys currently stored inside the vault")
     private boolean listVault;
 
+    @CommandLine.Option(names = {"--script"}, description = "script file to execute, full path")
+    private String scriptPath;
+
     @Override
     public Integer call() throws Exception {
         // log management
@@ -132,7 +136,21 @@ public class Start implements Callable<Integer> {
                     System.out.printf("Value for key <%s> is '%s'\n", vaultKey, value);
                 }
             }
-        } else {
+        } else if(scriptPath != null) {
+            // master: run a script
+            if(Paths.get(scriptPath).toFile().exists()) {
+                AScriptInterpreterTask scriptInterpreterTask = new AScriptInterpreterTask(scriptPath, System.in, System.out, System.err);
+                ExecutorService executorService = Executors.newSingleThreadExecutor();
+                Future<Integer> exitCode = executorService.submit(scriptInterpreterTask);
+                try {
+                    return exitCode.get();
+                } catch (InterruptedException | ExecutionException e) {
+                    throw new AScriptException(e.getMessage());
+                }
+            } else {
+                LOGGER.warning(String.format("File '%s' does not exists, sorry.", scriptPath));
+            }
+        } else if (!"".equals(playbookPath)) {
             // master: run a playbook
             if(Paths.get(playbookPath).toFile().exists()) {
                 if(Paths.get(playbookPath).toFile().canRead()) {
@@ -166,6 +184,8 @@ public class Start implements Callable<Integer> {
             } else {
                 CommandLine.usage(this, System.out);
             }
+        } else {
+            CommandLine.usage(this, System.out);
         }
         return 0;
     }
