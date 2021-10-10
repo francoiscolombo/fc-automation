@@ -26,6 +26,7 @@ public class AScript implements Callable<Integer> {
             try {
                 return exitCode.get();
             } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
                 throw new AScriptException(e.getMessage());
             }
         } else {

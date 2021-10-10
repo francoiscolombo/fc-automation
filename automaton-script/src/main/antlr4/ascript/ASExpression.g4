@@ -53,6 +53,6 @@ isnanfunc
     : ISNAN LPAREN expression RPAREN
     ;
 
-//exprlist
-//    : expression (COMMA expression)*
-//    ;
+exprlist
+    : expression (COMMA expression)*
+    ;

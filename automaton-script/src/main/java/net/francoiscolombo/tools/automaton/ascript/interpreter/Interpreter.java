@@ -64,7 +64,9 @@ public class Interpreter {
     }
 
     public void clear() {
-        memory.free();
+        if(memory != null) {
+            memory.free();
+        }
     }
 
 }

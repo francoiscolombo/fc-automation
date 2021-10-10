@@ -1,6 +1,9 @@
 package net.francoiscolombo.tools.automaton.ascript.interpreter;
 
 import java.io.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.logging.Logger;
 
 import ascript.AScriptBaseVisitor;
 import ascript.AScriptParser;
@@ -9,9 +12,14 @@ import net.francoiscolombo.tools.automaton.ascript.exceptions.ContinueLoopExcept
 import net.francoiscolombo.tools.automaton.ascript.exceptions.ExitLoopException;
 import net.francoiscolombo.tools.automaton.ascript.exceptions.InterpreterException;
 import net.francoiscolombo.tools.automaton.ascript.exceptions.TypeException;
+import net.francoiscolombo.tools.automaton.ascript.statements.*;
+import net.francoiscolombo.tools.automaton.ascript.statements.File;
 import org.antlr.v4.runtime.ParserRuleContext;
 
 public class AScriptVisitor extends AScriptBaseVisitor<Value> {
+
+    // global logger
+    private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     final private InputStream stdin;
     final private PrintStream stdout;
@@ -19,6 +27,7 @@ public class AScriptVisitor extends AScriptBaseVisitor<Value> {
     final private Memory memory;
 
     private PrintStream printStream;
+    private PrintStream errorStream;
     private BufferedReader inputStream;
 
     public AScriptVisitor(Memory memory, InputStream stdin, PrintStream stdout, PrintStream stderr) {
@@ -40,6 +49,7 @@ public class AScriptVisitor extends AScriptBaseVisitor<Value> {
 
     private void init() {
         printStream = new PrintStream(stdout, true);
+        errorStream = new PrintStream(stderr, true);
         inputStream = new BufferedReader(new InputStreamReader(stdin));
     }
 
@@ -208,31 +218,6 @@ public class AScriptVisitor extends AScriptBaseVisitor<Value> {
     }
 
     @Override
-    public Value visitPrintstmt(AScriptParser.PrintstmtContext ctx) {
-        Value value = visit(ctx.expression());
-        if (value.isNumber()) {
-            printStream.println(value.internalNumber());
-        } else {
-            printStream.println(value.internalString());
-        }
-        return value;
-    }
-
-    @Override
-    public Value visitInputstmt(AScriptParser.InputstmtContext ctx) {
-        printStream.print(visit(ctx.string()).internalString() + " ");
-        String varname = ctx.vardecl().getText();
-        try {
-            String line = inputStream.readLine();
-            Value val = new Value(line);
-            memory.assign(varname, val);
-            return val;
-        } catch (IOException e) {
-            throw new RuntimeException(e); // TODO
-        }
-    }
-
-    @Override
     public Value visitForstmt(AScriptParser.ForstmtContext ctx) {
         String varname = ctx.vardecl().varname().ID().getText();
         Value start = visit(ctx.expression(0));
@@ -294,5 +279,165 @@ public class AScriptVisitor extends AScriptBaseVisitor<Value> {
     public Value visitExitstmt(AScriptParser.ExitstmtContext ctx) {
         throw new ExitLoopException();
     }
-    
+
+    @Override
+    public Value visitInputstmt(AScriptParser.InputstmtContext ctx) {
+        printStream.print(visit(ctx.string()).internalString() + " ");
+        String varname = ctx.vardecl().getText();
+        try {
+            String line = inputStream.readLine();
+            Value val = new Value(line);
+            memory.assign(varname, val);
+            return val;
+        } catch (IOException e) {
+            throw new RuntimeException(e); // TODO
+        }
+    }
+
+    @Override
+    public Value visitPrintstmt(AScriptParser.PrintstmtContext ctx) {
+        Print print = new Print(printStream, errorStream);
+        return print.visitStatement(visit(ctx.expression()));
+    }
+
+    @Override
+    public Value visitCompressstmt(AScriptParser.CompressstmtContext ctx) {
+        Compress compress = new Compress(printStream, errorStream);
+        return compress.visitStatement(visit(ctx.expression(0)), visit(ctx.expression(1)));
+    }
+
+    @Override
+    public Value visitExtractstmt(AScriptParser.ExtractstmtContext ctx) {
+        Extract extract = new Extract(printStream, errorStream);
+        return extract.visitStatement(visit(ctx.expression(0)), visit(ctx.expression(1)));
+    }
+
+    @Override
+    public Value visitCopystmt(AScriptParser.CopystmtContext ctx) {
+        Copy copy = new Copy(printStream, errorStream);
+        return copy.visitStatement(visit(ctx.expression(0)), visit(ctx.expression(1)));
+    }
+
+    @Override
+    public Value visitShowstmt(AScriptParser.ShowstmtContext ctx) {
+        Show show = new Show(printStream, errorStream);
+        return show.visitStatement(visit(ctx.expression()));
+    }
+
+    @Override
+    public Value visitDownloadstmt(AScriptParser.DownloadstmtContext ctx) {
+        Download download = new Download(printStream, errorStream);
+        return download.visitStatement(visit(ctx.expression(0)), visit(ctx.expression(1)));
+    }
+
+    @Override
+    public Value visitExecutestmt(AScriptParser.ExecutestmtContext ctx) {
+        String varname = ctx.vardecl().getText();
+        Execute execute = new Execute(printStream, errorStream);
+        Value value = execute.visitStatement(visit(ctx.expression(0)), visit(ctx.expression(1)));
+        Value val = new Value(execute.getOutput());
+        memory.assign(varname, val);
+        return value;
+    }
+
+    @Override
+    public Value visitFilestmt(AScriptParser.FilestmtContext ctx) {
+        File file = new File(printStream, errorStream);
+        Value value = new Value(-1);
+        if(ctx.expression(2) != null) {
+            if(ctx.expression(3) != null) {
+                value = file.visitStatement(visit(ctx.expression(0)),visit(ctx.expression(1)),visit(ctx.expression(2)),visit(ctx.expression(3)));
+            } else {
+                value = file.visitStatement(visit(ctx.expression(0)),visit(ctx.expression(1)),visit(ctx.expression(2)));
+            }
+        } else {
+            value = file.visitStatement(visit(ctx.expression(0)),visit(ctx.expression(1)));
+        }
+        return value;
+    }
+
+    @Override
+    public Value visitLinesstmt1(AScriptParser.Linesstmt1Context ctx) {
+        LinesBefore linesBefore = new LinesBefore(printStream, errorStream);
+        return linesBefore.visitStatement(visit(ctx.expression(0)),visit(ctx.expression(1)),visit(ctx.expression(2)));
+    }
+
+    @Override
+    public Value visitLinesstmt2(AScriptParser.Linesstmt2Context ctx) {
+        LinesAfter linesAfter = new LinesAfter(printStream, errorStream);
+        return linesAfter.visitStatement(visit(ctx.expression(0)),visit(ctx.expression(1)),visit(ctx.expression(2)));
+    }
+
+    @Override
+    public Value visitLinesstmt3(AScriptParser.Linesstmt3Context ctx) {
+        LinesReplace linesReplace = new LinesReplace(printStream, errorStream);
+        return linesReplace.visitStatement(visit(ctx.expression(0)),visit(ctx.expression(1)),visit(ctx.expression(2)));
+    }
+
+    @Override
+    public Value visitPackagestmt(AScriptParser.PackagestmtContext ctx) {
+        Packages packages = new Packages(printStream, errorStream);
+        final List<Value> valueList = new LinkedList<>();
+        ctx.exprlist().expression().forEach(v -> {
+            valueList.add(visit(v));
+        });
+        return packages.visitStatement(valueList.toArray(Value[]::new));
+    }
+
+    @Override
+    public Value visitPingstmt(AScriptParser.PingstmtContext ctx) {
+        Ping ping = new Ping(printStream, errorStream);
+        return ping.visitStatement(visit(ctx.expression()));
+    }
+
+    @Override
+    public Value visitScanstmt(AScriptParser.ScanstmtContext ctx) {
+        ScanNetwork scanNetwork = new ScanNetwork(printStream, errorStream);
+        return scanNetwork.visitStatement(visit(ctx.expression()));
+    }
+
+    @Override
+    public Value visitScriptstmt(AScriptParser.ScriptstmtContext ctx) {
+        Script script = new Script(printStream, errorStream);
+        String varname = ctx.vardecl().getText();
+        Value val = script.visitStatement(visit(ctx.expression()));
+        memory.assign(varname, val);
+        Memory mem = script.getMemory();
+        for(String name : mem.getVariables()) {
+            memory.assign(name, mem.get(name));
+        }
+        mem.free();
+        return val;
+    }
+
+    @Override
+    public Value visitSendstmt(AScriptParser.SendstmtContext ctx) {
+        SendFile sendFile = new SendFile(printStream, errorStream);
+        return sendFile.visitStatement(visit(ctx.expression(0)),visit(ctx.expression(1)),visit(ctx.expression(2)),visit(ctx.expression(3)));
+    }
+
+    @Override
+    public Value visitTemplatestmt1(AScriptParser.Templatestmt1Context ctx) {
+        TemplateFromFile template = new TemplateFromFile(printStream, errorStream, memory);
+        return template.visitStatement(visit(ctx.expression(0)),visit(ctx.expression(1)));
+    }
+
+    @Override
+    public Value visitTemplatestmt2(AScriptParser.Templatestmt2Context ctx) {
+        TemplateFromContent template = new TemplateFromContent(printStream, errorStream, memory);
+        return template.visitStatement(visit(ctx.expression(0)),visit(ctx.expression(1)));
+    }
+
+    @Override
+    public Value visitUnzipstmt(AScriptParser.UnzipstmtContext ctx) {
+        Zip zip = new Zip(printStream, errorStream);
+        return zip.visitStatement(visit(ctx.expression(0)),visit(ctx.expression(1)));
+    }
+
+    @Override
+    public Value visitZipstmt(AScriptParser.ZipstmtContext ctx) {
+        Unzip unzip = new Unzip(printStream, errorStream);
+        return unzip.visitStatement(visit(ctx.expression(0)),visit(ctx.expression(1)));
+    }
+
 }
