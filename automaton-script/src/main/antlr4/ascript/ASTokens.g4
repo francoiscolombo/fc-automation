@@ -30,6 +30,17 @@ RPAREN : ')' ;
 LEN : 'LEN' | 'len' ;
 VAL : 'VAL' | 'val' ;
 ISNAN   : 'ISNAN' | 'isnan' ;
+LOWER : 'LOWER' | 'lower' ;
+UPPER : 'UPPER' | 'upper' ;
+CONTAINS : 'CONTAINS' | 'contains' ;
+MATCHES : 'MATCHES' | 'matches' ;
+LEFT : 'LEFT' | 'left' ;
+RIGHT : 'RIGHT' | 'right' ;
+SUBSTR : 'SUBSTR' | 'substr' ;
+STARTSWITH : 'STARTSWITH' | 'startswith' ;
+ENDSWITH : 'ENDSWITH' | 'endswith' ;
+REPLACEWITH : 'REPLACEWITH' | 'replacewith' ;
+CONCAT : 'CONCAT' | 'concat' ;
 
 // keywords
 PRINT    : 'PRINT' | 'print' ;

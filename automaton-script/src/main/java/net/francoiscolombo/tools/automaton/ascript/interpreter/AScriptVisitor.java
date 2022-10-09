@@ -1,6 +1,7 @@
 package net.francoiscolombo.tools.automaton.ascript.interpreter;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -115,6 +116,146 @@ public class AScriptVisitor extends AScriptBaseVisitor<Value> {
             throw new TypeException("Couldn't evaluate LEN(). Argument is not a string");
         }
     }
+
+    @Override
+    public Value visitLowerfunc(AScriptParser.LowerfuncContext ctx) {
+        Value arg = visit(ctx.expression());
+        if (arg.isString()) {
+            return new Value(arg.internalString().toLowerCase());
+        } else {
+            throw new TypeException("Couldn't evaluate LOWER(). Argument is not a string");
+        }
+    }
+
+    @Override
+    public Value visitUpperfunc(AScriptParser.UpperfuncContext ctx) {
+        Value arg = visit(ctx.expression());
+        if (arg.isString()) {
+            return new Value(arg.internalString().toUpperCase());
+        } else {
+            throw new TypeException("Couldn't evaluate UPPER(). Argument is not a string");
+        }
+    }
+
+    @Override
+    public Value visitContainsfunc(AScriptParser.ContainsfuncContext ctx) {
+        Value arg1 = visit(ctx.expression(0));
+        Value arg2 = visit(ctx.expression(1));
+        if (arg1.isString()) {
+            if (arg2.isString()) {
+                return arg1.internalString().contains(arg2.internalString()) ? Value.TRUE : Value.FALSE;
+            } else {
+                throw new TypeException("Couldn't evaluate CONTAINS(). Second argument is not a string");
+            }
+        } else {
+            throw new TypeException("Couldn't evaluate CONTAINS(). First argument is not a string");
+        }
+    }
+
+    @Override
+    public Value visitMatchesfunc(AScriptParser.MatchesfuncContext ctx) {
+        Value arg1 = visit(ctx.expression(0));
+        Value arg2 = visit(ctx.expression(1));
+        if (arg1.isString()) {
+            if (arg2.isString()) {
+                return arg1.internalString().matches(arg2.internalString()) ? Value.TRUE : Value.FALSE;
+            } else {
+                throw new TypeException("Couldn't evaluate MATCHES(). Second argument is not a string");
+            }
+        } else {
+            throw new TypeException("Couldn't evaluate MATCHES(). First argument is not a string");
+        }
+    }
+
+    @Override
+    public Value visitLeftfunc(AScriptParser.LeftfuncContext ctx) {
+        Value arg1 = visit(ctx.expression(0));
+        Value arg2 = visit(ctx.expression(1));
+        if (arg1.isString()) {
+            if (arg2.isNumber()) {
+                return new Value(arg1.internalString().substring(0, (int)arg2.internalNumber()));
+            } else {
+                throw new TypeException("Couldn't evaluate LEFT(). Second argument is not a number");
+            }
+        } else {
+            throw new TypeException("Couldn't evaluate LEFT(). First argument is not a string");
+        }
+    }
+
+    @Override
+    public Value visitRightfunc(AScriptParser.RightfuncContext ctx) {
+        Value arg1 = visit(ctx.expression(0));
+        Value arg2 = visit(ctx.expression(1));
+        if (arg1.isString()) {
+            if (arg2.isNumber()) {
+                int start = (int)(arg1.internalString().length() - arg2.internalNumber());
+                int end = arg1.internalString().length();
+                return new Value(arg1.internalString().substring(start, end));
+            } else {
+                throw new TypeException("Couldn't evaluate RIGHT(). Second argument is not a number");
+            }
+        } else {
+            throw new TypeException("Couldn't evaluate RIGHT(). First argument is not a string");
+        }
+    }
+
+    @Override
+    public Value visitSubstrfunc(AScriptParser.SubstrfuncContext ctx) {
+        Value arg1 = visit(ctx.expression(0));
+        Value arg2 = visit(ctx.expression(1));
+        Value arg3 = visit(ctx.expression(2));
+        if (arg1.isString()) {
+            if (arg2.isNumber()) {
+                if (arg3.isNumber()) {
+                    int start = (int)arg2.internalNumber();
+                    int end = (int)arg3.internalNumber();
+                    return new Value(arg1.internalString().substring(start, end));
+                } else {
+                    throw new TypeException("Couldn't evaluate SUBSTR(). Third argument is not a number");
+                }
+            } else {
+                throw new TypeException("Couldn't evaluate SUBSTR(). Second argument is not a number");
+            }
+        } else {
+            throw new TypeException("Couldn't evaluate SUBSTR(). First argument is not a string");
+        }
+    }
+
+    @Override
+    public Value visitStartswithfunc(AScriptParser.StartswithfuncContext ctx) {
+        Value arg1 = visit(ctx.expression(0));
+        Value arg2 = visit(ctx.expression(1));
+        if (arg1.isString()) {
+            if (arg2.isString()) {
+                return arg1.internalString().startsWith(arg2.internalString()) ? Value.TRUE : Value.FALSE;
+            } else {
+                throw new TypeException("Couldn't evaluate STARTSWITH(). Second argument is not a string");
+            }
+        } else {
+            throw new TypeException("Couldn't evaluate STARTSWITH(). First argument is not a string");
+        }
+    }
+
+    @Override
+    public Value visitEndswithfunc(AScriptParser.EndswithfuncContext ctx) {
+        Value arg1 = visit(ctx.expression(0));
+        Value arg2 = visit(ctx.expression(1));
+        if (arg1.isString()) {
+            if (arg2.isString()) {
+                return arg1.internalString().startsWith(arg2.internalString()) ? Value.TRUE : Value.FALSE;
+            } else {
+                throw new TypeException("Couldn't evaluate ENDSWITH(). Second argument is not a string");
+            }
+        } else {
+            throw new TypeException("Couldn't evaluate STARTSWITH(). First argument is not a string");
+        }
+    }
+/*
+    | endswithfunc
+    | replacewithfunc
+    | concatfunc
+ */
+
 
     @Override
     public Value visitValfunc(AScriptParser.ValfuncContext ctx) {

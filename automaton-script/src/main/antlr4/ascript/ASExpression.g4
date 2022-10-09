@@ -27,6 +27,17 @@ func
     : lenfunc
     | valfunc
     | isnanfunc
+    | lowerfunc
+    | upperfunc
+    | containsfunc
+    | matchesfunc
+    | leftfunc
+    | rightfunc
+    | substrfunc
+    | startswithfunc
+    | endswithfunc
+    | replacewithfunc
+    | concatfunc
     ;
 
 string
@@ -51,6 +62,50 @@ valfunc
 
 isnanfunc
     : ISNAN LPAREN expression RPAREN
+    ;
+
+lowerfunc
+    : LOWER LPAREN expression RPAREN
+    ;
+
+upperfunc
+    : UPPER LPAREN expression RPAREN
+    ;
+
+containsfunc
+    : CONTAINS LPAREN expression COMMA expression RPAREN
+    ;
+
+matchesfunc
+    : MATCHES LPAREN expression COMMA expression RPAREN
+    ;
+
+leftfunc
+    : LEFT LPAREN expression COMMA expression RPAREN
+    ;
+
+rightfunc
+    : RIGHT LPAREN expression COMMA expression RPAREN
+    ;
+
+substrfunc
+    : SUBSTR LPAREN expression COMMA expression COMMA expression RPAREN
+    ;
+
+startswithfunc
+    : STARTSWITH LPAREN expression COMMA expression RPAREN
+    ;
+
+endswithfunc
+    : ENDSWITH LPAREN expression COMMA expression RPAREN
+    ;
+
+replacewithfunc
+    : REPLACEWITH LPAREN expression COMMA expression COMMA expression RPAREN
+    ;
+
+concatfunc
+    : CONCAT LPAREN expression COMMA expression RPAREN
     ;
 
 exprlist
