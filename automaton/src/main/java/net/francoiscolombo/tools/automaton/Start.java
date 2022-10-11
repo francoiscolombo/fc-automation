@@ -25,7 +25,7 @@ import java.util.logging.*;
 @CommandLine.Command(
         name = "automaton",
         mixinStandardHelpOptions = true,
-        version = "automaton 1.0.0",
+        version = "automaton 1.1.0",
         description = "automaton is a tool for helping you to manage efficiently your servers configuration"
 )
 public class Start implements Callable<Integer> {
