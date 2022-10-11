@@ -209,6 +209,9 @@ public class AScriptVisitor extends AScriptBaseVisitor<Value> {
                 if (arg3.isNumber()) {
                     int start = (int)arg2.internalNumber();
                     int end = (int)arg3.internalNumber();
+                    if(end<start) {
+                        throw new TypeException("Couldn't evaluate SUBSTR(), third argument is lower than the second one.");
+                    }
                     return new Value(arg1.internalString().substring(start, end));
                 } else {
                     throw new TypeException("Couldn't evaluate SUBSTR(). Third argument is not a number");
