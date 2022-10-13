@@ -32,6 +32,9 @@ statement
     | zipstmt
     | pingstmt
     | scanstmt
+    | grepstmt
+    | searchstmt
+    | liststmt
     | COMMENT;
 
 block
@@ -168,4 +171,16 @@ pingstmt
 
 scanstmt
     : SCAN NETWORK? expression
+    ;
+
+grepstmt
+    : GREP expression FROM expression
+    ;
+
+searchstmt
+    : SEARCH expression FROM expression
+    ;
+
+liststmt
+    : LIST expression FROM expression
     ;

@@ -12,3 +12,10 @@ WHILE b > 0
 ENDWHILE
 
 PRINT "GCD=" + a
+
+test = "ceci est un test"
+PRINT UPPER(test)
+PRINT LEFT(test,4)
+PRINT SUBSTR(test,5,8)
+PRINT RIGHT(test,4)
+PRINT STARTSWITH(test,"ceci")

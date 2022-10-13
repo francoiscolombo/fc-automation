@@ -91,6 +91,9 @@ ZIP      : 'ZIP' | 'zip' ;
 PING     : 'PING' | 'ping' ;
 SCAN     : 'SCAN' | 'scan' ;
 NETWORK  : 'NETWORK' | 'network' ;
+GREP     : 'GREP' | 'grep' ;
+SEARCH   : 'SEARCH' | 'search' ;
+LIST     : 'LIST' | 'list' ;
 
 // comments
 COMMENT : REM ~[\r\n]* ;
