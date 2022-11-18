@@ -13,6 +13,14 @@ vault:
   - key: "v2"
 
 stages:
+  - action: "GatherFacts"
+    display: "Get host facts"
+    parameters:
+      set: "full"
+  - action: "Debug"
+    display: "display contents of collected facts"
+    parameters:
+      var: "fact_.*"
   - action: "Eval"
     display: "add 30 + 20 + 10 to variable v3"
     parameters:

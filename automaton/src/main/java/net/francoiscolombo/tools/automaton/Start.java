@@ -5,8 +5,6 @@ import io.grpc.ServerBuilder;
 import net.francoiscolombo.tools.automaton.agent.client.AgentClient;
 import net.francoiscolombo.tools.automaton.agent.client.AgentResult;
 import net.francoiscolombo.tools.automaton.agent.service.AgentService;
-import net.francoiscolombo.tools.automaton.ascript.AScriptInterpreterTask;
-import net.francoiscolombo.tools.automaton.ascript.exceptions.AScriptException;
 import net.francoiscolombo.tools.automaton.cypher.VaultManager;
 import net.francoiscolombo.tools.automaton.models.Hostname;
 import net.francoiscolombo.tools.automaton.models.Playbook;
@@ -43,40 +41,37 @@ public class Start implements Callable<Integer> {
     };
 
     @CommandLine.Option(names = {"--playbook"}, defaultValue="", description = "playbook to execute, full path")
-    private String playbookPath;
+    protected String playbookPath;
 
     @CommandLine.Option(names = {"--ping-only"}, description = "ping all the nodes of a playbook to check if agents are started")
-    private boolean pingAgents;
+    protected boolean pingAgents;
 
     @CommandLine.Option(names = {"--output"}, defaultValue = "", description = "redirect stdout to a file")
-    private String logFilePath;
+    protected String logFilePath;
 
     @CommandLine.Option(names = {"--agent"}, description = "starts as an agent (you should set the port in this case, otherwise the default port value of 8071 is taken)")
-    private boolean isAgentMode;
+    protected boolean isAgentMode;
 
     @CommandLine.Option(names = {"--port"}, defaultValue = "8071", description = "port on which the agent will listening")
-    private String agentPort;
+    protected String agentPort;
 
     @CommandLine.Option(names = {"--vault"}, description = "manage the local vault")
-    private boolean isVault;
+    protected boolean isVault;
 
     @CommandLine.Option(names = {"--create"}, defaultValue = "", description = "create a key in the vault and set the initial value")
-    private String createKey;
+    protected String createKey;
 
     @CommandLine.Option(names = {"--update"}, defaultValue = "", description = "update the value of an existing key in the vault with a new value")
-    private String updateKey;
+    protected String updateKey;
 
     @CommandLine.Option(names = {"--delete"}, defaultValue = "", description = "delete an existing key in the vault")
-    private String deleteKey;
+    protected String deleteKey;
 
     @CommandLine.Option(names = {"--retrieve"}, defaultValue = "", description = "retrieve the value of an existing key in the vault")
-    private String vaultKey;
+    protected String vaultKey;
 
     @CommandLine.Option(names = {"--list"}, description = "list all the keys currently stored inside the vault")
-    private boolean listVault;
-
-    @CommandLine.Option(names = {"--script"}, description = "script file to execute, full path")
-    private String scriptPath;
+    protected boolean listVault;
 
     @Override
     public Integer call() throws Exception {
@@ -136,20 +131,6 @@ public class Start implements Callable<Integer> {
                     System.out.printf("Value for key <%s> is '%s'\n", vaultKey, value);
                 }
             }
-        } else if(scriptPath != null) {
-            // master: run a script
-            if(Paths.get(scriptPath).toFile().exists()) {
-                AScriptInterpreterTask scriptInterpreterTask = new AScriptInterpreterTask(scriptPath, System.in, System.out, System.err);
-                ExecutorService executorService = Executors.newSingleThreadExecutor();
-                Future<Integer> exitCode = executorService.submit(scriptInterpreterTask);
-                try {
-                    return exitCode.get();
-                } catch (InterruptedException | ExecutionException e) {
-                    throw new AScriptException(e.getMessage());
-                }
-            } else {
-                LOGGER.warning(String.format("File '%s' does not exists, sorry.", scriptPath));
-            }
         } else if (!"".equals(playbookPath)) {
             // master: run a playbook
             if(Paths.get(playbookPath).toFile().exists()) {
@@ -192,7 +173,7 @@ public class Start implements Callable<Integer> {
 
     public static void main(String... args) {
         int exitCode;
-        try (AnsiConsole ansi = AnsiConsole.windowsInstall()) {
+        try (AnsiConsole ignored = AnsiConsole.windowsInstall()) {
             exitCode = new CommandLine(new Start()).execute(args);
         }
         System.exit(exitCode);
